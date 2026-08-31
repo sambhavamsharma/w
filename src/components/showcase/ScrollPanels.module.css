@@ -1,0 +1,71 @@
+.panels {
+  --gutter: clamp(1.125rem, 3.4vw, 3.25rem);
+
+  position: relative;
+  z-index: 1;
+  /* Rises over the mosaic while it is still pinned, instead of waiting for it
+     to scroll off. The mosaic reserves this viewport at the end of its runway. */
+  margin-top: -100vh;
+  margin-top: -100dvh;
+}
+
+/* Rides along the top of the panels, the way the reference keeps its wordmark
+   in the corner once the opening frame is behind you. */
+.brandmark {
+  position: sticky;
+  top: var(--gutter);
+  z-index: 2;
+  height: 0;
+  padding-left: var(--gutter);
+  line-height: 0;
+  pointer-events: none;
+}
+
+.brandmarkImage {
+  height: clamp(0.8rem, 1.4vw, 1.05rem);
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--gutter);
+}
+
+/* With the carousel in it the panel becomes a column: title above, carousel
+   taking the rest of the height. */
+.panel[data-carousel="true"] {
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  padding-top: calc(var(--gutter) + 2.5rem);
+}
+
+/* The carousel positions its own track absolutely, so it needs a box with a
+   height of its own to sit in. */
+.carousel {
+  position: relative;
+  width: 100%;
+  height: min(62vh, 33rem);
+}
+
+.panel[data-tone="olive"] {
+  background: #4e5842;
+}
+
+.panel[data-tone="deep"] {
+  background: #181c11;
+}
+
+.title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.5rem, 3.6vw, 3rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.015em;
+}

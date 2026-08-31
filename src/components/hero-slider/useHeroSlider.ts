@@ -156,20 +156,20 @@ export function useHeroSlider({
     [],
   );
 
-  // Wheel / trackpad. Bound natively so it can be non-passive: a full-viewport
-  // hero should swallow the gesture rather than let the page scroll under it.
+  // Wheel / trackpad, horizontal only. There is a page below the hero now, so
+  // a vertical wheel has to keep scrolling it; sideways gestures are the ones
+  // that belong to the slider.
   useEffect(() => {
     const node = rootRef.current;
     if (!node || count < 2) return;
 
     const onWheel = (event: WheelEvent) => {
       if (event.ctrlKey) return; // pinch-zoom
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
       event.preventDefault();
       if (animatingRef.current) return;
 
-      const delta =
-        Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-      wheelAccumRef.current += delta;
+      wheelAccumRef.current += event.deltaX;
 
       window.clearTimeout(wheelResetRef.current);
       wheelResetRef.current = window.setTimeout(() => {
@@ -189,11 +189,15 @@ export function useHeroSlider({
     return () => node.removeEventListener("wheel", onWheel);
   }, [count, next, prev]);
 
-  // Keyboard.
+  // Keyboard: left and right only. Up/down and Home/End belong to the page now
+  // that there is one below the hero, and the keys are ignored altogether once
+  // the hero has been scrolled past.
   useEffect(() => {
     if (count < 2) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+
       const target = event.target as HTMLElement | null;
       if (
         target &&
@@ -202,28 +206,14 @@ export function useHeroSlider({
         return;
       }
 
-      switch (event.key) {
-        case "ArrowRight":
-        case "ArrowDown":
-          event.preventDefault();
-          next();
-          break;
-        case "ArrowLeft":
-        case "ArrowUp":
-          event.preventDefault();
-          prev();
-          break;
-        case "Home":
-          event.preventDefault();
-          goToRef.current(0, -1);
-          break;
-        case "End":
-          event.preventDefault();
-          goToRef.current(count - 1, 1);
-          break;
-        default:
-          break;
-      }
+      const box = rootRef.current?.getBoundingClientRect();
+      if (!box) return;
+      const shown = Math.min(box.bottom, window.innerHeight) - Math.max(box.top, 0);
+      if (shown < window.innerHeight * 0.5) return;
+
+      event.preventDefault();
+      if (event.key === "ArrowRight") next();
+      else prev();
     };
 
     window.addEventListener("keydown", onKeyDown);
