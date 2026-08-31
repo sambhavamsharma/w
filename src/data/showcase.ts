@@ -5,6 +5,28 @@ import teaTree from "@/assets/slides/02-rose-dream.jpg";
 import lavender from "@/assets/slides/03-violet-mystique.jpg";
 import goldenHour from "@/assets/slides/04-golden-hour.jpg";
 
+/** The nine boxes of the mosaic, by position in the grid. */
+export type MosaicCell =
+  | "top-left"
+  | "top"
+  | "top-right"
+  | "left"
+  | "right"
+  | "bottom-left"
+  | "bottom"
+  | "bottom-right";
+
+export interface MosaicTile {
+  /** Which box this fills. Each one takes its own picture. */
+  cell: MosaicCell;
+  image: StaticImageData;
+  /**
+   * Optional CSS object-position. The edge boxes are narrow strips, so a
+   * picture often needs telling where its subject sits.
+   */
+  focus?: string;
+}
+
 export interface Showcase {
   /** Wordmark set over the mosaic. */
   eyebrow: string;
@@ -15,8 +37,8 @@ export interface Showcase {
   body: string;
   /** Fills the frame at the start, then recedes into the mosaic. */
   centre: StaticImageData;
-  /** The eight tiles the centre image recedes to expose, clockwise from top-left. */
-  surround: StaticImageData[];
+  /** The eight boxes the centre picture recedes to expose. */
+  tiles: MosaicTile[];
 }
 
 export const showcase: Showcase = {
@@ -24,8 +46,21 @@ export const showcase: Showcase = {
   body:
     "A hand wash range in three scents. Citrus, tea tree and lavender, " +
     "each made for the quiet part of the day.",
+
   centre: lavender,
-  surround: [citrus, teaTree, goldenHour, citrus, teaTree, goldenHour, lavender, citrus],
+
+  // One line per box. Point each at its own file — several repeat for now
+  // because there are only four photographs in the project.
+  tiles: [
+    { cell: "top-left", image: citrus },
+    { cell: "top", image: teaTree },
+    { cell: "top-right", image: goldenHour },
+    { cell: "left", image: citrus },
+    { cell: "right", image: teaTree },
+    { cell: "bottom-left", image: lavender },
+    { cell: "bottom", image: goldenHour },
+    { cell: "bottom-right", image: citrus },
+  ],
 };
 
 export interface PanelSlide {

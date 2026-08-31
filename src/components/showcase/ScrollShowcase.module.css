@@ -1,8 +1,12 @@
 .section {
   --p: 0;
-  /* How far the mosaic opens: the edge bands at their widest. */
-  --edge-x: calc(21% * var(--p));
-  --edge-y: calc(16% * var(--p));
+  /* The grid is fixed at its open state; the centre is scaled over the top of
+     it instead. Animating the track sizes meant a full layout of nine images
+     on every scroll frame, which is what made this crawl on a phone. */
+  --edge-x: 21%;
+  --edge-y: 16%;
+  /* Big enough for the centre to cover the frame at rest: 1 / (1 - 2 × 21%). */
+  --zoom-max: 1.76;
   --gutter: clamp(1.125rem, 3.4vw, 3.25rem);
 
   position: relative;
@@ -20,15 +24,13 @@
 
 /* ------------------------------------------------------------- mosaic */
 
-/* The centre cell holds the frame at the start; as the edge tracks widen it
-   draws back and the surrounding range comes into view around it. */
 .mosaic {
   position: absolute;
   inset: 0;
   display: grid;
   grid-template-columns: var(--edge-x) 1fr var(--edge-x);
   grid-template-rows: var(--edge-y) 1fr var(--edge-y);
-  gap: calc(2px * var(--p));
+  gap: 2px;
   background: #050505;
 }
 
@@ -38,31 +40,30 @@
   overflow: hidden;
 }
 
+/* Covers the whole frame at the start and pulls back to its own cell, which
+   exposes the range around it. A transform only — no layout, no repaint of
+   the tiles underneath, so it stays on the compositor. */
 .centre {
   grid-column: 2;
   grid-row: 2;
+  z-index: 1;
+  transform: scale(calc(1 + (var(--zoom-max) - 1) * (1 - var(--p))));
+  will-change: transform;
 }
 
-/* Clockwise from top-left, skipping the middle. */
-.tile[data-cell="0"] { grid-column: 1; grid-row: 1; }
-.tile[data-cell="1"] { grid-column: 2; grid-row: 1; }
-.tile[data-cell="2"] { grid-column: 3; grid-row: 1; }
-.tile[data-cell="3"] { grid-column: 3; grid-row: 2; }
-.tile[data-cell="4"] { grid-column: 3; grid-row: 3; }
-.tile[data-cell="5"] { grid-column: 2; grid-row: 3; }
-.tile[data-cell="6"] { grid-column: 1; grid-row: 3; }
-.tile[data-cell="7"] { grid-column: 1; grid-row: 2; }
+/* Every box is placed by name, so each one can take its own picture. */
+.tile[data-cell="top-left"] { grid-column: 1; grid-row: 1; }
+.tile[data-cell="top"] { grid-column: 2; grid-row: 1; }
+.tile[data-cell="top-right"] { grid-column: 3; grid-row: 1; }
+.tile[data-cell="left"] { grid-column: 1; grid-row: 2; }
+.tile[data-cell="right"] { grid-column: 3; grid-row: 2; }
+.tile[data-cell="bottom-left"] { grid-column: 1; grid-row: 3; }
+.tile[data-cell="bottom"] { grid-column: 2; grid-row: 3; }
+.tile[data-cell="bottom-right"] { grid-column: 3; grid-row: 3; }
 
 .image {
   object-fit: cover;
   object-position: center;
-}
-
-/* The centre frame starts pushed in and unwinds to its true crop, so the
-   photograph reads as pulling back rather than simply being cropped tighter
-   as its cell shrinks. Landing on exactly 1 keeps it covering with no gap. */
-.centre .image {
-  transform: scale(calc(1 + 0.22 * (1 - var(--p))));
 }
 
 /* ------------------------------------------------------------ overlay */
@@ -111,13 +112,14 @@
    finish before the runway runs out, rather than on the very last pixel. */
 .word {
   opacity: clamp(0.16, calc(var(--p) * (var(--words) + 5) - var(--i)), 1);
-  transition: opacity 120ms linear;
 }
 
 @media (max-width: 47.99em) {
   .section {
-    --edge-x: calc(13% * var(--p));
-    --edge-y: calc(9% * var(--p));
+    --edge-x: 13%;
+    --edge-y: 9%;
+    /* 1 / (1 - 2 × 13%) */
+    --zoom-max: 1.38;
     --gutter: 1.125rem;
   }
 
@@ -129,6 +131,5 @@
 @media (prefers-reduced-motion: reduce) {
   .word {
     opacity: 1;
-    transition: none;
   }
 }

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import type { Brandmark } from "@/data/slides";
 import type { Panel } from "@/data/showcase";
-import { PerspectiveCarousel } from "@/components/ui/perspective-carousel";
+import { RangeCarousel } from "./RangeCarousel";
 import styles from "./ScrollPanels.module.css";
 
 export interface ScrollPanelsProps {
@@ -45,16 +45,12 @@ export function ScrollPanels({ panels, brandmark }: ScrollPanelsProps) {
 
           {panel.carousel ? (
             <div className={styles.carousel}>
-              <PerspectiveCarousel
+              <RangeCarousel
                 items={panel.carousel.map((slide) => ({
                   src: slide.image.src,
                   title: slide.title,
                   alt: slide.alt,
                 }))}
-                loop
-                slideWidth={230}
-                labelClassName="text-white/85 uppercase tracking-[0.22em] text-[0.625rem]"
-                controlsClassName="border-white/20 bg-black/25 text-white backdrop-blur-sm"
               />
             </div>
           ) : null}

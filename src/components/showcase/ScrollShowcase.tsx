@@ -10,12 +10,11 @@ import styles from "./ScrollShowcase.module.css";
 export interface ScrollShowcaseProps {
   showcase: Showcase;
   /**
-   * Scroll runway, as a multiple of the viewport, spent opening the mosaic and
-   * lighting the sentence. Three more viewports are added on top: the pin
-   * itself, a beat where the finished frame rests, and the handoff to the
-   * panel that rises over it.
+   * Viewports of scrolling spent opening the mosaic and lighting the sentence.
    */
   runway?: number;
+  /** Viewports the finished frame rests for before the panel rises over it. */
+  hold?: number;
 }
 
 function usePrefersReducedMotion(): boolean {
@@ -41,7 +40,11 @@ function usePrefersReducedMotion(): boolean {
  * scroll, so the whole thing is CSS from there on and nothing animates per
  * frame in JavaScript.
  */
-export function ScrollShowcase({ showcase, runway = 2.6 }: ScrollShowcaseProps) {
+export function ScrollShowcase({
+  showcase,
+  runway = 1.6,
+  hold = 0.4,
+}: ScrollShowcaseProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = usePrefersReducedMotion();
   const words = showcase.body.split(/\s+/).filter(Boolean);
@@ -61,11 +64,10 @@ export function ScrollShowcase({ showcase, runway = 2.6 }: ScrollShowcaseProps) 
     const update = () => {
       frame = 0;
       const box = section.getBoundingClientRect();
-      // Distance travelled through the runway, ignoring the pinned viewport.
-      // Three viewports are held back at the end: one for the pin itself, one
-      // for the finished frame to rest on, and one for the panel to rise over
-      // it. The pull-back therefore has to be done well before the handoff.
-      const travel = box.height - window.innerHeight * 3;
+      // Held back at the end: the pinned viewport itself, the rest beat, and
+      // the viewport the panel needs to rise over the top. What is left is the
+      // distance the pull-back actually runs over.
+      const travel = box.height - window.innerHeight * (hold + 2);
       const progress = travel <= 0 ? 1 : Math.min(Math.max(-box.top / travel, 0), 1);
       section.style.setProperty("--p", progress.toFixed(4));
     };
@@ -84,10 +86,10 @@ export function ScrollShowcase({ showcase, runway = 2.6 }: ScrollShowcaseProps) 
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, hold]);
 
   const style = {
-    "--runway": `${(runway + 3) * 100}vh`,
+    "--runway": `${(runway + hold + 2) * 100}vh`,
     "--words": words.length,
   } as CSSProperties;
 
@@ -95,16 +97,17 @@ export function ScrollShowcase({ showcase, runway = 2.6 }: ScrollShowcaseProps) 
     <section ref={sectionRef} className={styles.section} style={style}>
       <div className={styles.pin}>
         <div className={styles.mosaic}>
-          {showcase.surround.map((image, index) => (
-            <div key={index} className={styles.tile} data-cell={index}>
+          {showcase.tiles.map((tile) => (
+            <div key={tile.cell} className={styles.tile} data-cell={tile.cell}>
               <Image
                 className={styles.image}
-                src={image}
+                src={tile.image}
                 alt=""
                 fill
                 sizes="20vw"
                 quality={70}
                 draggable={false}
+                style={tile.focus ? { objectPosition: tile.focus } : undefined}
               />
             </div>
           ))}
