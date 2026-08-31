@@ -7,6 +7,9 @@ import type { PerspectiveCarouselItem } from "@/components/ui/perspective-carous
 
 export interface RangeCarouselProps {
   items: PerspectiveCarouselItem[];
+  /** Driven from the page's scroll position. */
+  activeIndex?: number;
+  onActiveIndexChange?: (index: number) => void;
 }
 
 /**
@@ -20,7 +23,11 @@ export interface RangeCarouselProps {
  * The chevron-and-dots pill is off: the peeking cards are the affordance, and
  * each card is a button, so tapping one brings it forward. Arrow keys work too.
  */
-export function RangeCarousel({ items }: RangeCarouselProps) {
+export function RangeCarousel({
+  items,
+  activeIndex,
+  onActiveIndexChange,
+}: RangeCarouselProps) {
   const [isPhone, setIsPhone] = useState(false);
 
   useEffect(() => {
@@ -34,6 +41,8 @@ export function RangeCarousel({ items }: RangeCarouselProps) {
   return (
     <PerspectiveCarousel
       items={items}
+      activeIndex={activeIndex}
+      onActiveIndexChange={onActiveIndexChange}
       loop
       slideWidth={isPhone ? 186 : 230}
       rotationStep={isPhone ? 48 : 60}

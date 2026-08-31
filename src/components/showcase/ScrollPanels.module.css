@@ -8,7 +8,9 @@
 
   position: relative;
   z-index: 1;
-  height: 200vh;
+  /* Travel is set by the component: the taller it is, the more scrolling each
+     card and the sweep take. */
+  height: var(--stage-runway, 340vh);
   /* Rises over the mosaic while that is still pinned, same as the panels do. */
   margin-top: -100vh;
   margin-top: -100dvh;
