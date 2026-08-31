@@ -46,28 +46,52 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  transition: transform var(--dur) var(--ease);
+  opacity: 0;
 }
 
+/* No cross-fade: the swap happens behind the columns, unseen. */
 .slide[data-role="current"] {
-  z-index: 2;
-  will-change: transform;
-}
-
-.slide[data-role="previous"] {
   z-index: 1;
+  opacity: 1;
 }
 
-/* Rides over the outgoing frame only, deepening as it is covered. */
-.slideScrim {
+/* --------------------------------------------------------- slide type */
+
+/* Part of the slide, so it is blacked out with it by the columns. */
+.content {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  display: block;
-  background: #000;
-  opacity: 0;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  /* Only the display word lives here now, so it sits at the foot. */
+  justify-content: flex-end;
+  /* Clears the brandmark above and the slide nav below. */
+  padding: var(--gutter) var(--gutter) calc(var(--gutter) + 3.6rem);
   pointer-events: none;
-  transition: opacity var(--dur) var(--ease);
+}
+
+.content[data-tone="light"] {
+  --type: #fff;
+  --type-muted: rgba(255, 255, 255, 0.62);
+  --type-rule: rgba(255, 255, 255, 0.28);
+}
+
+.content[data-tone="dark"] {
+  --type: #0b0b0b;
+  --type-muted: rgba(11, 11, 11, 0.72);
+  --type-rule: rgba(11, 11, 11, 0.32);
+}
+
+.display {
+  margin: 0;
+  color: var(--type);
+  font-size: clamp(2.75rem, 17vw, 13rem);
+  font-weight: 800;
+  line-height: 0.82;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
 }
 
 .image {
@@ -84,6 +108,89 @@
   background:
     linear-gradient(to bottom, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0) 16%),
     linear-gradient(to top, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0) 26%);
+}
+
+/* ------------------------------------------------------------ curtain */
+
+/* Sits above the settled slide but below the chrome, so the logo and the
+   slide nav stay put while the new photograph builds up underneath them. */
+.curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Each band is a full-frame copy of the incoming slide, clipped to its strip.
+   Clipping rather than scaling is what keeps the photograph still while its
+   strip opens — the image never stretches. */
+.band {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  will-change: clip-path;
+  animation-duration: var(--travel);
+  animation-timing-function: var(--ease);
+  animation-delay: calc(var(--stagger) * var(--step));
+  animation-fill-mode: both;
+}
+
+.curtain[data-axis="y"] .band {
+  animation-name: bandUp;
+}
+
+.curtain[data-axis="x"][data-dir="1"] .band {
+  animation-name: bandFromRight;
+}
+
+.curtain[data-axis="x"][data-dir="-1"] .band {
+  animation-name: bandFromLeft;
+}
+
+/* Columns climbing from the foot. */
+@keyframes bandUp {
+  from {
+    clip-path: inset(100% var(--r) 0 var(--l));
+  }
+  to {
+    clip-path: inset(0 var(--r) 0 var(--l));
+  }
+}
+
+/* Rows arriving from the right. */
+@keyframes bandFromRight {
+  from {
+    clip-path: inset(var(--t) 0 var(--b) 100%);
+  }
+  to {
+    clip-path: inset(var(--t) 0 var(--b) 0);
+  }
+}
+
+/* Rows arriving from the left. */
+@keyframes bandFromLeft {
+  from {
+    clip-path: inset(var(--t) 100% var(--b) 0);
+  }
+  to {
+    clip-path: inset(var(--t) 0 var(--b) 0);
+  }
+}
+
+/* Reduced motion: the slide simply resolves, with no staircase and no travel. */
+.root[data-motion="reduced"] .band {
+  animation-name: bandFade;
+  animation-duration: calc(var(--dur) * 0.7);
+  animation-delay: 0ms;
+}
+
+@keyframes bandFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ------------------------------------------------------------------ ui */
@@ -298,6 +405,10 @@
 
   .navButton:not([data-active="true"]) .navTitle {
     display: none;
+  }
+
+  .content {
+    padding: var(--gutter) var(--gutter) calc(var(--gutter) + 3.2rem);
   }
 
 }

@@ -4,32 +4,28 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export type Direction = 1 | -1;
 
-/**
- * "arm" parks the incoming slide at its start transform with transitions off,
- * "run" releases it so the browser interpolates to the resting transform.
- */
-export type Phase = "idle" | "arm" | "run";
-
-/** Which way the incoming slide travels in. */
+/** Bands run as vertical columns ("y") or as horizontal rows ("x"). */
 export type Axis = "x" | "y";
 
 export interface HeroSliderOptions {
   count: number;
-  /** Transition length in ms. */
+  /** Whole transition length in ms: first band moving to last band landing. */
   duration: number;
   autoplay: boolean;
   autoplayDelay: number;
 }
 
 export interface HeroSliderApi {
+  /** The slide painted full-frame underneath. */
   current: number;
-  previous: number | null;
+  /** The slide the bands are carrying in, or null when settled. */
+  incoming: number | null;
+  /** What the navigation and counters should point at — the target, at once. */
+  active: number;
   direction: Direction;
-  phase: Phase;
-  /** Alternates every transition, the way the reference does. */
   axis: Axis;
-  /** Live horizontal drag in px; 0 unless the pointer is down or just released. */
-  dragOffset: number;
+  /** Increments per transition, so the bands remount and restart cleanly. */
+  transitionId: number;
   isDragging: boolean;
   reducedMotion: boolean;
   /** True while the autoplay timer is counting down. */
@@ -48,11 +44,10 @@ export interface HeroSliderApi {
 
 interface SliderState {
   current: number;
-  previous: number | null;
+  incoming: number | null;
   direction: Direction;
-  phase: Phase;
-  /** Alternates every transition, the way the reference does. */
   axis: Axis;
+  transitionId: number;
 }
 
 interface PointerState {
@@ -88,28 +83,25 @@ export function useHeroSlider({
   autoplayDelay,
 }: HeroSliderOptions): HeroSliderApi {
   const reducedMotion = usePrefersReducedMotion();
-  const effectiveDuration = reducedMotion ? 260 : duration;
+  const effectiveDuration = reducedMotion ? 280 : duration;
 
   const [state, setState] = useState<SliderState>({
     current: 0,
-    previous: null,
+    incoming: null,
     direction: 1,
-    phase: "idle",
+    // Seeded to "x" so the first transition runs as columns from the foot.
     axis: "x",
+    transitionId: 0,
   });
-  const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [documentHidden, setDocumentHidden] = useState(false);
 
   const rootRef = useRef<HTMLElement | null>(null);
   const currentRef = useRef(0);
   const animatingRef = useRef(false);
-  const rafRef = useRef(0);
-  const releaseRef = useRef(0);
+  const axisRef = useRef<Axis>("x");
   const settleRef = useRef(0);
   const pointerRef = useRef<PointerState | null>(null);
-  /** Seeded to "y" so the first transition comes in horizontally. */
-  const axisRef = useRef<Axis>("y");
   const wheelAccumRef = useRef(0);
   const wheelResetRef = useRef(0);
 
@@ -127,34 +119,23 @@ export function useHeroSlider({
       const axis: Axis = axisRef.current === "x" ? "y" : "x";
       axisRef.current = axis;
       animatingRef.current = true;
-      currentRef.current = target;
-      setState({ current: target, previous: from, direction: resolved, phase: "arm", axis });
 
-      // Two frames: the first commits the "arm" styles, the second releases
-      // them so the transition has a real start value to interpolate from.
-      // A backstop timer covers the case where rAF is paused outright, which
-      // is what a browser does to a backgrounded tab.
-      let released = false;
-      const release = () => {
-        if (released) return;
-        released = true;
-        setState((prev) => (prev.phase === "arm" ? { ...prev, phase: "run" } : prev));
-        setDragOffset(0);
-      };
-
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = requestAnimationFrame(release);
-      });
-
-      window.clearTimeout(releaseRef.current);
-      releaseRef.current = window.setTimeout(release, 64);
+      setState((prev) => ({
+        current: prev.current,
+        incoming: target,
+        direction: resolved,
+        axis,
+        transitionId: prev.transitionId + 1,
+      }));
 
       window.clearTimeout(settleRef.current);
       settleRef.current = window.setTimeout(() => {
         animatingRef.current = false;
-        setState((prev) => ({ ...prev, previous: null, phase: "idle" }));
-      }, effectiveDuration + 60);
+        currentRef.current = target;
+        // The bands already cover the frame with this very slide, so promoting
+        // it and dropping them is not visible.
+        setState((prev) => ({ ...prev, current: target, incoming: null }));
+      }, effectiveDuration + 40);
     },
     [count, effectiveDuration],
   );
@@ -169,8 +150,6 @@ export function useHeroSlider({
 
   useEffect(
     () => () => {
-      cancelAnimationFrame(rafRef.current);
-      window.clearTimeout(releaseRef.current);
       window.clearTimeout(settleRef.current);
       window.clearTimeout(wheelResetRef.current);
     },
@@ -261,27 +240,26 @@ export function useHeroSlider({
   const autoplayRunning =
     autoplay && !reducedMotion && count > 1 && !isDragging && !documentHidden;
 
-  const activeIndex = state.current;
+  const active = state.incoming ?? state.current;
 
   useEffect(() => {
     if (!autoplayRunning) return;
     // Re-armed on every slide change, so the countdown always starts fresh.
     const timer = window.setTimeout(() => next(), autoplayDelay);
     return () => window.clearTimeout(timer);
-  }, [autoplayRunning, autoplayDelay, next, activeIndex]);
+  }, [autoplayRunning, autoplayDelay, next, active]);
 
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
     if ((event.target as HTMLElement).closest("[data-slider-nodrag]")) return;
     if (animatingRef.current) return;
 
-    const box = event.currentTarget.getBoundingClientRect();
     pointerRef.current = {
       id: event.pointerId,
       x: event.clientX,
       y: event.clientY,
       axis: null,
-      width: box.width || 1,
+      width: event.currentTarget.getBoundingClientRect().width || 1,
     };
     setIsDragging(true);
   }, []);
@@ -289,25 +267,21 @@ export function useHeroSlider({
   const onPointerMove = useCallback((event: React.PointerEvent<HTMLElement>) => {
     const pointer = pointerRef.current;
     if (!pointer || pointer.id !== event.pointerId) return;
+    if (pointer.axis) return;
 
     const dx = event.clientX - pointer.x;
     const dy = event.clientY - pointer.y;
+    if (Math.abs(dx) < AXIS_LOCK_PX && Math.abs(dy) < AXIS_LOCK_PX) return;
 
-    if (!pointer.axis) {
-      if (Math.abs(dx) < AXIS_LOCK_PX && Math.abs(dy) < AXIS_LOCK_PX) return;
-      pointer.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
-      if (pointer.axis === "x") {
-        try {
-          event.currentTarget.setPointerCapture(pointer.id);
-        } catch {
-          // The pointer can already be gone (cancelled by the browser, or a
-          // synthetic event); the drag still works without capture.
-        }
+    pointer.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+    if (pointer.axis === "x") {
+      try {
+        event.currentTarget.setPointerCapture(pointer.id);
+      } catch {
+        // The pointer can already be gone (cancelled by the browser, or a
+        // synthetic event); the drag still works without capture.
       }
     }
-
-    if (pointer.axis !== "x") return;
-    setDragOffset(dx);
   }, []);
 
   const endDrag = useCallback(
@@ -329,15 +303,9 @@ export function useHeroSlider({
       const threshold = Math.max(48, Math.min(140, pointer.width * 0.1));
 
       if (commit && pointer.axis === "x" && Math.abs(dx) >= threshold) {
-        // dragOffset is deliberately left in place here: goTo hands it to the
-        // outgoing slide during "arm" so the frame carries on from where the
-        // finger left it instead of snapping back to centre first.
         const step: Direction = dx < 0 ? 1 : -1;
         goToRef.current(currentRef.current + step, step);
-        return;
       }
-
-      setDragOffset(0);
     },
     [],
   );
@@ -354,11 +322,11 @@ export function useHeroSlider({
 
   return {
     current: state.current,
-    previous: state.previous,
+    incoming: state.incoming,
+    active,
     direction: state.direction,
-    phase: state.phase,
     axis: state.axis,
-    dragOffset,
+    transitionId: state.transitionId,
     isDragging,
     reducedMotion,
     autoplayRunning,
