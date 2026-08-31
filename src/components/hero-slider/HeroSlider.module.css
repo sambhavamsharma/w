@@ -1,0 +1,316 @@
+.root {
+  --ease: cubic-bezier(0.5, 0, 0.2, 1);
+  --dur: 620ms;
+  --autoplay: 4500ms;
+  --gutter: clamp(1.125rem, 3.4vw, 3.25rem);
+  --hairline: rgba(255, 255, 255, 0.22);
+  --hairline-strong: rgba(255, 255, 255, 0.85);
+  --ink: rgba(255, 255, 255, 0.55);
+  --ink-strong: #fff;
+
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #050505;
+  color: var(--ink-strong);
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.root[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+.root:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.5);
+  outline-offset: -2px;
+}
+
+/* ---------------------------------------------------------------- stage */
+
+.stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* Keeps the slide z-indexes contained within the stack. */
+  isolation: isolate;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transition: transform var(--dur) var(--ease);
+}
+
+.slide[data-role="current"] {
+  z-index: 2;
+  will-change: transform;
+}
+
+.slide[data-role="previous"] {
+  z-index: 1;
+}
+
+/* Rides over the outgoing frame only, deepening as it is covered. */
+.slideScrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.image {
+  object-fit: cover;
+}
+
+/* Barely-there scrims: just enough to hold 12px white type over a bright
+   frame, nowhere near a gradient overlay. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0) 16%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0) 26%);
+}
+
+/* ------------------------------------------------------------------ ui */
+
+.ui {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.ui > * {
+  pointer-events: auto;
+}
+
+.label {
+  font-size: clamp(0.5rem, 0.62vw, 0.625rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  /* Invisible over the dark frames; keeps the type readable over the pale
+     monochrome one without reaching for a heavier scrim. */
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.55);
+}
+
+/* ----------------------------------------------------------- brandmark */
+
+.brandmark {
+  position: absolute;
+  top: var(--gutter);
+  left: var(--gutter);
+  line-height: 0;
+}
+
+/* The supplied artwork is black on transparent; this renders it white while
+   keeping its antialiasing. Swap in a white asset and drop the filter. */
+.brandmarkImage {
+  height: clamp(1.4rem, 2.7vw, 1.95rem);
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+/* ------------------------------------------------------- edge counters */
+
+.edge {
+  position: absolute;
+  top: 50%;
+  pointer-events: none;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.edgeLeft {
+  left: var(--gutter);
+}
+
+.edgeRight {
+  right: var(--gutter);
+}
+
+/* ---------------------------------------------------------- bottom nav */
+
+.bottomNav {
+  position: absolute;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  left: var(--gutter);
+}
+
+.navList {
+  display: flex;
+  gap: clamp(0.5rem, 1.4vw, 1.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navItem {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.navButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: left;
+  cursor: pointer;
+  transition: color 500ms var(--ease);
+}
+
+.navButton:hover,
+.navButton:focus-visible {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.navButton[data-active="true"] {
+  color: var(--ink-strong);
+}
+
+.navButton:focus-visible {
+  outline: none;
+}
+
+.navRule {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--hairline);
+  overflow: hidden;
+}
+
+.navRuleFill {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--hairline-strong);
+}
+
+.navButton:hover .navRuleFill,
+.navButton:focus-visible .navRuleFill {
+  transform: scaleX(1);
+  background: rgba(255, 255, 255, 0.45);
+  transition: transform 600ms var(--ease);
+}
+
+.navButton[data-active="true"] .navRuleFill {
+  transform: scaleX(1);
+  background: var(--hairline-strong);
+}
+
+/* When autoplay is running the active hairline doubles as the timer. */
+.navButton[data-active="true"][data-timing="true"] .navRuleFill {
+  transform: scaleX(0);
+  animation: sweep var(--autoplay) linear forwards;
+}
+
+@keyframes sweep {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.navLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7em;
+  padding-top: 0.85em;
+  white-space: nowrap;
+}
+
+.navIndex {
+  color: inherit;
+}
+
+.navTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------- responsive */
+
+/* Six names will not sit across a phone. Collapse to the numerals and let
+   only the active slide carry its title. */
+@media (max-width: 47.99em) {
+  .root {
+    --gutter: 1.125rem;
+  }
+
+  .label {
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+  }
+
+  .navList {
+    gap: 0.45rem;
+  }
+
+  .navItem {
+    flex: 0 1 auto;
+  }
+
+  .navItem[data-active="true"] {
+    flex: 1 1 auto;
+  }
+
+  .navRule {
+    min-width: 1.5rem;
+  }
+
+  .navButton:not([data-active="true"]) .navTitle {
+    display: none;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transition:
+      opacity 240ms ease,
+      transform 240ms ease;
+  }
+
+  .navButton[data-active="true"][data-timing="true"] .navRuleFill {
+    transform: scaleX(1);
+    animation: none;
+  }
+}
