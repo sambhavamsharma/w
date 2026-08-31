@@ -5,8 +5,11 @@
      on every scroll frame, which is what made this crawl on a phone. */
   --edge-x: 21%;
   --edge-y: 16%;
-  /* Big enough for the centre to cover the frame at rest: 1 / (1 - 2 × 21%). */
-  --zoom-max: 1.76;
+  /* Big enough for the centre to cover the frame at the start. The bands take
+     42% of the width and the gaps a couple of pixels more, so 1 / (1 - 2 × 21%)
+     lands a few pixels short at some widths and lets a sliver of the mosaic
+     show through. */
+  --zoom-max: 1.8;
   --gutter: clamp(1.125rem, 3.4vw, 3.25rem);
 
   position: relative;
@@ -116,10 +119,17 @@
 
 @media (max-width: 47.99em) {
   .section {
-    --edge-x: 13%;
-    --edge-y: 9%;
-    /* 1 / (1 - 2 × 13%) */
-    --zoom-max: 1.38;
+    /* A phone viewport is far taller than it is wide, so the same bands that
+       give a near-square centre on a desktop leave a tall narrow slot here —
+       and a landscape photograph cropped into that shows about a quarter of
+       itself, hugely magnified. Widening the centre and deepening the top and
+       bottom bands brings its shape back in line with the desktop one. */
+    --edge-x: 9%;
+    --edge-y: 25%;
+    /* Enough for the centre to still cover the frame at the start: the bands
+       take half the height and the gaps a few pixels more, so 1 / (1 - 2 × 25%)
+       lands a hair short. */
+    --zoom-max: 2.05;
     --gutter: 1.125rem;
   }
 

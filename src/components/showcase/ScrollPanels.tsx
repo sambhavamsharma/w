@@ -9,6 +9,11 @@ export interface ScrollPanelsProps {
   panels: Panel[];
   /** Small wordmark that rides along the top of the panels. */
   brandmark?: Brandmark;
+  /**
+   * Pull the group up a viewport so it rises over whatever is pinned above it.
+   * Only the group that follows the mosaic wants this.
+   */
+  overlapPrevious?: boolean;
 }
 
 /**
@@ -19,9 +24,13 @@ export interface ScrollPanelsProps {
  * handoff the reference makes between its sections. From there the panels flow
  * normally, one after the other.
  */
-export function ScrollPanels({ panels, brandmark }: ScrollPanelsProps) {
+export function ScrollPanels({
+  panels,
+  brandmark,
+  overlapPrevious = true,
+}: ScrollPanelsProps) {
   return (
-    <div className={styles.panels}>
+    <div className={styles.panels} data-overlap={overlapPrevious ? "true" : "false"}>
       {brandmark ? (
         <div className={styles.brandmark}>
           <Image

@@ -96,3 +96,6 @@ export const panels: Panel[] = [
   },
   { id: "connect", title: "Connect", tone: "deep" },
 ];
+
+/** The deep panel's colour, used by the curtain that sweeps Range into Connect. */
+export const deepTone = "#181c11";
