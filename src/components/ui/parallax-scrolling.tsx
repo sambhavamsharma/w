@@ -17,6 +17,8 @@ export interface ParallaxLayer {
    * height. Positive holds it back; negative sends it up faster than the page.
    */
   yPercent: number;
+  /** A gentler push for phones, where the layers have far less room to travel. */
+  phoneYPercent?: number;
   /** Skipped on phones, where the layer is laid out as a full-bleed backdrop. */
   desktopOnly?: boolean;
 }
@@ -29,8 +31,8 @@ export interface ParallaxLayer {
  * above the slide-in sheet.
  */
 const DEFAULT_LAYERS: ParallaxLayer[] = [
-  { layer: "1", yPercent: -30 },
-  { layer: "2", yPercent: 90 },
+  { layer: "1", yPercent: -30, phoneYPercent: -14 },
+  { layer: "2", yPercent: 90, phoneYPercent: 40 },
 ];
 
 export interface ParallaxComponentProps {
@@ -66,28 +68,53 @@ export function ParallaxComponent({
     // tweens and triggers rather than every ScrollTrigger on the page.
     const media = gsap.matchMedia(root);
 
-    media.add({ desktop: "(min-width: 769px)" }, (context) => {
-      const { desktop } = context.conditions as { desktop: boolean };
+    // matchMedia only runs the callback when a named condition matches, so the
+    // phone width needs its own entry or nothing would run below 769px.
+    media.add(
+      { desktop: "(min-width: 769px)", phone: "(max-width: 768px)" },
+      (context) => {
+        const { desktop } = context.conditions as { desktop: boolean };
 
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: header,
-          start: "0% 0%",
-          end: "100% 0%",
-          scrub: 0,
-        },
-      });
-
-      layers
-        .filter(({ desktopOnly }) => desktop || !desktopOnly)
-        .forEach(({ layer, yPercent }, index) => {
-          timeline.to(
-            header.querySelectorAll(`[data-parallax-layer="${layer}"]`),
-            { yPercent, ease: "none" },
-            index === 0 ? undefined : "<",
-          );
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: header,
+            start: "0% 0%",
+            end: "100% 0%",
+            scrub: 0,
+          },
         });
-    });
+
+        // The blend between the two sections rises out of the panel below as the
+        // scroll goes on: it starts sunk out of sight (the panel covers it) and
+        // climbs over the hero's foot, so the purple thins into black gradually
+        // instead of the dark arriving all at once. The short fade fixed to the
+        // hero's foot covers the raw edge in the first few pixels. Layer tweens
+        // default to 0.5s, so the timeline is 0.5 long: 0.22 here means the
+        // cloud is fully in place well before the scroll is half done.
+        const cloud = header.querySelector("[data-parallax-cloud]");
+        if (cloud) {
+          timeline.fromTo(
+            cloud,
+            { yPercent: 100, opacity: 1 },
+            { yPercent: 0, opacity: 1, ease: "sine.inOut", duration: 0.22 },
+            0,
+          );
+        }
+
+        layers
+          .filter(({ desktopOnly }) => desktop || !desktopOnly)
+          .forEach(({ layer, yPercent, phoneYPercent }, index) => {
+            timeline.to(
+              header.querySelectorAll(`[data-parallax-layer="${layer}"]`),
+              {
+                yPercent: desktop ? yPercent : (phoneYPercent ?? yPercent),
+                ease: "none",
+              },
+              index === 0 ? 0 : "<",
+            );
+          });
+      },
+    );
 
     const lenis = new Lenis();
     lenis.on("scroll", ScrollTrigger.update);
@@ -103,7 +130,10 @@ export function ParallaxComponent({
       else lenis.start();
     };
     const observer = new MutationObserver(syncLock);
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     return () => {
       observer.disconnect();
@@ -117,6 +147,7 @@ export function ParallaxComponent({
     <div className={styles.parallax} ref={rootRef}>
       <div className={styles.header} ref={headerRef}>
         {children}
+        <div data-parallax-cloud className={styles.cloud} aria-hidden="true" />
       </div>
 
       <section className={styles.content}>

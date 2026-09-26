@@ -13,6 +13,73 @@
   position: relative;
 }
 
+/* The seam between the hero and the panel, softened into drifting cloud: the
+   panel's own colour rises out of the bottom in overlapping plumes, warming
+   through the hero's purple on the way. Held at zero until the scroll brings
+   it up, so the hero at rest is untouched. Its foot is the panel's exact
+   colour, which is what makes the join disappear. */
+.cloud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: min(62vh, 640px);
+  opacity: 0;
+  pointer-events: none;
+  /* Fades the top few pixels out so the box's own edge — which lands between
+     pixels while it rises and can draw a hairline — never shows. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 24px);
+  background:
+    radial-gradient(58% 78% at 14% 108%, rgba(10, 13, 10, 1) 0%, rgba(10, 13, 10, 0) 72%),
+    radial-gradient(52% 72% at 48% 112%, rgba(10, 13, 10, 1) 0%, rgba(10, 13, 10, 0) 74%),
+    radial-gradient(46% 68% at 86% 106%, rgba(10, 13, 10, 1) 0%, rgba(10, 13, 10, 0) 72%),
+    radial-gradient(70% 60% at 32% 78%, rgba(96, 78, 150, 0.5) 0%, rgba(96, 78, 150, 0) 70%),
+    radial-gradient(60% 55% at 74% 70%, rgba(168, 148, 221, 0.4) 0%, rgba(168, 148, 221, 0) 70%),
+    linear-gradient(
+      to top,
+      var(--content-bg) 0%,
+      rgba(22, 17, 34, 0.92) 26%,
+      rgba(88, 68, 140, 0.52) 58%,
+      rgba(160, 138, 214, 0) 100%
+    );
+}
+
+/* The hero's foot, always on. The cloud above has to be ramped in with the
+   scroll (at rest it would darken the bottle), which leaves the first few
+   pixels of scroll with a raw purple edge against the panel. This short fade
+   is already the panel's exact colour at the very bottom of the hero, so that
+   edge is never a line — whatever the scroll position, the hero simply ends in
+   the panel's colour. Eased stops keep it from reading as a band. */
+.header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: clamp(64px, 13vh, 140px);
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(10, 13, 10, 1) 0%,
+    rgba(10, 13, 10, 0.86) 14%,
+    rgba(10, 13, 10, 0.66) 28%,
+    rgba(10, 13, 10, 0.45) 42%,
+    rgba(10, 13, 10, 0.27) 56%,
+    rgba(10, 13, 10, 0.13) 70%,
+    rgba(10, 13, 10, 0.04) 85%,
+    rgba(10, 13, 10, 0) 100%
+  );
+}
+
+/* Phones are tall and narrow: a shorter cloud keeps the bottle's foot
+   readable at rest while still dissolving the seam as it scrolls away. */
+@media (max-width: 768px) {
+  .cloud {
+    height: min(44vh, 420px);
+  }
+}
+
 /* Reserves a further viewport at the end: the Range page rises over the
    bottom of whatever precedes it, and this is the part it covers. */
 .content {

@@ -3,12 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Store } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
 import bottle from "@/assets/hero/bottle.png";
 import { brandmark } from "@/data/slides";
-import { ArrowIcon, FacebookIcon, LinkedInIcon, XIcon } from "./icons";
+import { ArrowIcon } from "./icons";
 import styles from "./Hero.module.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -21,14 +22,26 @@ const NAV_LINKS = [
   { label: "Range", href: "/#range" },
   { label: "Ingredients", href: "#" },
   { label: "Story", href: "/" },
-  { label: "Contact", href: "#" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 const SOCIALS = [
-  { label: "Facebook", href: "#", Icon: FacebookIcon },
-  { label: "X", href: "#", Icon: XIcon },
-  { label: "LinkedIn", href: "#", Icon: LinkedInIcon },
+  {
+    label: "IndiaMART",
+    href: "https://www.indiamart.com/washela-consumer-product/",
+    Icon: Store,
+  },
 ];
+
+/**
+ * Releases the bottle's held entrance (see `.scope:not([data-bottle-ready])`
+ * in the CSS) once its image is decoded. It runs inline, as the page is
+ * parsed, rather than from an effect: on a first visit the bundle can take
+ * seconds to hydrate, and the bottle must not wait on it — nor start its
+ * animation before the image exists, which is what left it popping in with no
+ * motion, or missing. A timeout releases it regardless if the image stalls.
+ */
+const RELEASE_BOTTLE = `(function(){var s=document.currentScript,r=s&&s.closest("[data-hero]");if(!r)return;var i=r.querySelector("img[data-bottle]"),d=false;function go(){if(d)return;d=true;requestAnimationFrame(function(){requestAnimationFrame(function(){r.setAttribute("data-bottle-ready","")})})}function dec(){(i.decode?i.decode():Promise.resolve()).then(go,go)}setTimeout(go,4000);if(!i){go();return}if(i.complete&&i.naturalWidth>0)dec();else{i.addEventListener("load",dec,{once:true});i.addEventListener("error",go,{once:true})}})();`;
 
 /** Stagger index for the entrance choreography. */
 const d = (n: number) => ({ "--d": n }) as CSSProperties;
@@ -48,7 +61,6 @@ export function Hero() {
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [onPanel, setOnPanel] = useState(false);
-
   const syncBurgerContrast = useCallback(() => {
     const btn = toggleRef.current;
     const panel = panelRef.current;
@@ -107,7 +119,19 @@ export function Hero() {
   );
 
   return (
-    <div className={`${styles.scope} ${plusJakarta.className}`}>
+    // The inline release script sets `data-bottle-ready` before hydration, on
+    // purpose — React shouldn't flag that attribute as a mismatch.
+    <div
+      className={`${styles.scope} ${plusJakarta.className}`}
+      data-hero
+      suppressHydrationWarning
+    >
+      {/* Without scripts nothing would ever release the held bottle. */}
+      <noscript>
+        <style>
+          {"[data-hero] img{animation-play-state:running!important}"}
+        </style>
+      </noscript>
       <section className={styles.hero}>
         {/* Painted first so everything after it sits above — no z-index, so
             the burger can still rise above the nav sheet. */}
@@ -120,10 +144,12 @@ export function Hero() {
             alt="Washela lavender hand wash bottle."
             fill
             sizes="(max-width: 768px) 60vw, 30vw"
-            quality={90}
+            quality={85}
             priority
             draggable={false}
+            data-bottle
           />
+          <script dangerouslySetInnerHTML={{ __html: RELEASE_BOTTLE }} />
         </div>
 
         <nav className={styles.top} aria-label="Primary">
@@ -168,13 +194,13 @@ export function Hero() {
 
         <div className={styles.foot} data-parallax-layer="2">
           <h1 className={styles.footTitle} data-anim style={d(3)}>
-            Hands, dishes,
+            Clean, but
             <br />
-            floors &mdash; sorted.
+            make it chill.
           </h1>
           <p className={styles.footText} data-anim style={d(4)}>
-            Hand wash, dish wash and floor cleaner &mdash; everyday cleaning
-            made gentle, effortless and worth a second sniff.
+            Hand wash, dish wash and floor cleaner that smell like a good mood.
+            Do the chores, keep the vibe.
           </p>
         </div>
       </section>
@@ -203,8 +229,14 @@ export function Hero() {
           <div className={styles.navsheetFoot}>
             <div className={styles.navsheetSocials}>
               {SOCIALS.map(({ label, href, Icon }) => (
-                <a key={label} href={href} aria-label={label}>
-                  <Icon size={22} />
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon size={22} aria-hidden="true" />
+                  <span>{label}</span>
                 </a>
               ))}
             </div>

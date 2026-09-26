@@ -10,8 +10,9 @@
   /* How far the bottle leans: top toward the left. */
   --tilt: -10deg;
 
-  color: #fff;
-  background: #14101a;
+  /* Ink on a light, lavender-washed page. */
+  color: #1a1426;
+  background: #f4f1fa;
 }
 
 @keyframes fadeUp {
@@ -65,6 +66,15 @@
   animation-delay: calc(var(--d, 0) * var(--stagger));
 }
 
+/* The bottle is held at its first frame (invisible, below the fold) until an
+   inline script in the markup marks the hero once the image is decoded, then
+   it rises as designed. Only the
+   bottle is held: the background and copy don't depend on a big image, so they
+   play straight away and the hero is never blank while the bottle loads. */
+.scope:not([data-bottle-ready]) .bottle {
+  animation-play-state: paused;
+}
+
 /* ===================================================================
    Layout shell
    =================================================================== */
@@ -79,22 +89,22 @@
   min-height: 600px;
   width: 100%;
   overflow: hidden;
-  background: #14101a;
+  background: #f4f1fa;
 }
 
-/* Dark at the edges, the scent colour pooling behind the bottle. */
+/* White at the top left, the scent colour pooling behind the bottle. */
 .bloom {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(
       110% 95% at 72% 88%,
-      #b7a0ee 0%,
-      #8c6cd0 24%,
-      rgba(76, 44, 140, 0.85) 52%,
-      rgba(20, 16, 26, 0) 82%
+      #8e77cf 0%,
+      #a894dd 26%,
+      rgba(198, 186, 234, 0.9) 54%,
+      rgba(244, 241, 250, 0) 84%
     ),
-    linear-gradient(135deg, #14101a 0%, #1e1533 46%, #452c7a 100%);
+    linear-gradient(135deg, #faf8fd 0%, #ebe5f7 44%, #c3b4ea 100%);
   animation: bloom 2.4s var(--ease-out) 0.15s both;
 }
 
@@ -109,7 +119,7 @@
 
 .bottle {
   object-fit: contain;
-  filter: drop-shadow(0 46px 60px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 44px 56px rgba(52, 34, 104, 0.38));
   transform-origin: 50% 82%;
   animation:
     bottleIn 1.9s var(--ease-out) 0.25s both,
@@ -137,11 +147,11 @@
   flex: 0 0 auto;
 }
 
-/* The wordmark artwork is dark on transparent, forced to clean white. */
+/* The wordmark artwork is dark on transparent, forced to solid black. */
 .brandLogo {
   height: clamp(2rem, 3.6vw, 3.3rem);
   width: auto;
-  filter: brightness(0) invert(1);
+  filter: brightness(0);
 }
 
 .navLinks {
@@ -155,10 +165,10 @@
 
 .navLinks a {
   text-decoration: none;
-  color: #fff;
+  color: #14121a;
   font-size: clamp(14px, 1.02vw, 17px);
   font-weight: 500;
-  opacity: 0.88;
+  opacity: 0.78;
   transition: opacity 0.2s ease;
 }
 
@@ -170,7 +180,7 @@
   appearance: none;
   border: 0;
   background: transparent;
-  color: #fff;
+  color: #14121a;
   padding: 8px 0 8px 8px;
   cursor: pointer;
   display: none;
@@ -195,6 +205,11 @@
     transform 0.55s var(--ease-out),
     opacity 0.25s ease,
     width 0.45s var(--ease-out);
+}
+
+/* Over the dark sheet the bars go white again. */
+.burger[data-active][data-on-panel] {
+  color: #fff;
 }
 
 .burger:focus-visible {
@@ -247,7 +262,7 @@
   font-size: clamp(0.8rem, 0.95vw, 0.95rem);
   font-weight: 400;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(26, 20, 38, 0.72);
 }
 
 /* ===================================================================
@@ -270,7 +285,7 @@
 .navsheetScrim {
   position: absolute;
   inset: 0;
-  background: rgba(5, 17, 24, 0.45);
+  background: rgba(10, 10, 12, 0.5);
   opacity: 0;
   backdrop-filter: blur(0px);
   -webkit-backdrop-filter: blur(0px);
@@ -300,10 +315,10 @@
   flex-direction: column;
   padding: calc(var(--pad) + 78px) clamp(24px, 6vw, 52px) calc(var(--pad) + 12px);
   padding-bottom: max(calc(var(--pad) + 12px), env(safe-area-inset-bottom));
-  background: rgba(6, 22, 31, 0.9);
+  background: rgba(20, 20, 23, 0.94);
   backdrop-filter: blur(26px) saturate(150%);
   -webkit-backdrop-filter: blur(26px) saturate(150%);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow: -30px 0 80px rgba(0, 0, 0, 0.35);
   color: #fff;
   overflow-y: auto;
@@ -377,7 +392,7 @@
 
 .navsheetLink:hover,
 .navsheetLink:focus-visible {
-  color: #7fd7f2;
+  color: #c9c6d3;
 }
 
 .navsheetLink:hover svg,
@@ -419,7 +434,13 @@
 }
 
 .navsheetSocials a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: rgba(255, 255, 255, 0.72);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
   transition:
     color 0.2s ease,
     transform 0.2s ease;
@@ -462,17 +483,18 @@
 
   .bottleWrap {
     right: -12vw;
-    bottom: -6vh;
+    bottom: -10vh;
     height: 76vh;
   }
 
   .foot {
-    top: calc(var(--pad) + 4.6rem);
-    max-width: 54vw;
+    top: calc(var(--pad) + 4.4rem);
+    max-width: 64vw;
   }
 
+  /* Sized so the two-line headline stays on two lines down to ~320px. */
   .footTitle {
-    font-size: clamp(1.5rem, 7.4vw, 2.3rem);
+    font-size: clamp(1.25rem, 6.2vw, 2rem);
   }
 
   .footText {

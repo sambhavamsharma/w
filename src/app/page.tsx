@@ -1,11 +1,11 @@
 import { Hero } from "@/components/handwash/Hero";
 import { RangeStage } from "@/components/showcase/RangeStage";
-import { ScrollPanels } from "@/components/showcase/ScrollPanels";
+import { ContactFooter } from "@/components/ui/contact-footer";
 import { ParallaxComponent } from "@/components/ui/parallax-scrolling";
-import { deepTone, panels, showcase } from "@/data/showcase";
+import { panels, showcase } from "@/data/showcase";
 import { brandmark } from "@/data/slides";
 
-const [rangePanel, connectPanel] = panels;
+const [rangePanel] = panels;
 
 export default function Home() {
   return (
@@ -17,18 +17,14 @@ export default function Home() {
         <Hero />
       </ParallaxComponent>
 
-      {/* The Range page, sweeping straight into Connect on the way out. */}
+      {/* The Range page, sweeping straight into the contact footer on the way out. */}
       <RangeStage
         panel={rangePanel}
         brandmark={brandmark}
-        curtainColor={deepTone}
+        curtainColor="#ffffff"
       />
 
-      <ScrollPanels
-        panels={[connectPanel]}
-        brandmark={brandmark}
-        overlapPrevious={false}
-      />
+      <ContactFooter />
     </main>
   );
 }

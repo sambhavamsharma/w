@@ -3,6 +3,47 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* shadcn tokens, read by the primitives in components/ui. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* The site is dark-only, so these are the one set of values: the page's own
+   near-black, with the hero's dusty lavender as the accent. */
+:root {
+  --background: #181c11;
+  --foreground: #ffffff;
+  --primary: #ece8f4;
+  --primary-foreground: #14121a;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: rgba(255, 255, 255, 0.58);
+  --accent: rgba(165, 159, 184, 0.22);
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --popover: #1f2417;
+  --popover-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.14);
+  --input: rgba(255, 255, 255, 0.18);
+  --ring: #a59fb8;
 }
 
 html {
@@ -26,6 +67,29 @@ body {
 ::selection {
   background: #fff;
   color: #050505;
+}
+
+/* A light section on the dark page — the contact footer. Same tokens, flipped:
+   apply the class to any element and everything shadcn inside re-themes. */
+.theme-light {
+  --background: #ffffff;
+  --foreground: #14121a;
+  --primary: #14121a;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(20, 18, 26, 0.06);
+  --secondary-foreground: #14121a;
+  --muted: rgba(20, 18, 26, 0.05);
+  --muted-foreground: rgba(20, 18, 26, 0.62);
+  --accent: #ece8f6;
+  --accent-foreground: #14121a;
+  --popover: #ffffff;
+  --popover-foreground: #14121a;
+  --border: rgba(20, 18, 26, 0.12);
+  --input: rgba(20, 18, 26, 0.2);
+  --ring: #8e77cf;
+
+  background: var(--background);
+  color: var(--foreground);
 }
 
 /* Scroll lock while the hand-wash hero's nav sheet is open. */
