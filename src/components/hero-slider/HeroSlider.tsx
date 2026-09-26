@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback } from "react";
 import type { CSSProperties } from "react";
 
 import type { Brandmark as BrandmarkData, Slide } from "@/data/slides";
@@ -42,11 +41,8 @@ export function HeroSlider({
     reducedMotion,
     autoplayRunning,
     rootRef,
-    goTo,
     pointerHandlers,
   } = useHeroSlider({ count, duration, autoplay, autoplayDelay });
-
-  const selectSlide = useCallback((index: number) => goTo(index), [goTo]);
 
   if (count === 0) return null;
 
@@ -127,12 +123,7 @@ export function HeroSlider({
           {total}
         </span>
 
-        <BottomNav
-          slides={slides}
-          current={active}
-          timing={autoplayRunning}
-          onSelect={selectSlide}
-        />
+        <BottomNav slides={slides} current={active} timing={autoplayRunning} />
       </div>
 
       {incoming === null ? null : (

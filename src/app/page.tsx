@@ -1,17 +1,21 @@
-import { HeroSlider } from "@/components/hero-slider/HeroSlider";
+import { Hero } from "@/components/handwash/Hero";
 import { RangeStage } from "@/components/showcase/RangeStage";
 import { ScrollPanels } from "@/components/showcase/ScrollPanels";
-import { ScrollShowcase } from "@/components/showcase/ScrollShowcase";
+import { ParallaxComponent } from "@/components/ui/parallax-scrolling";
 import { deepTone, panels, showcase } from "@/data/showcase";
-import { brandmark, slides } from "@/data/slides";
+import { brandmark } from "@/data/slides";
 
 const [rangePanel, connectPanel] = panels;
 
 export default function Home() {
   return (
     <main>
-      <HeroSlider slides={slides} brandmark={brandmark} />
-      <ScrollShowcase showcase={showcase} />
+      {/* The hero scrolls away with a parallax on its layers and hands straight
+          over to the statement panel — no scene in between. The panel reserves
+          a viewport at its foot for the Range page to rise over. */}
+      <ParallaxComponent eyebrow={showcase.eyebrow} statement={showcase.body}>
+        <Hero />
+      </ParallaxComponent>
 
       {/* The Range page, sweeping straight into Connect on the way out. */}
       <RangeStage

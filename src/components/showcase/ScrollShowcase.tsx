@@ -46,12 +46,15 @@ export function ScrollShowcase({
   hold = 0.4,
 }: ScrollShowcaseProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const pinRef = useRef<HTMLDivElement | null>(null);
   const reducedMotion = usePrefersReducedMotion();
   const words = showcase.body.split(/\s+/).filter(Boolean);
+  const units = runway + hold + 2;
 
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    const pin = pinRef.current;
+    if (!section || !pin) return;
 
     // Reduced motion gets the settled state outright, with no scroll coupling.
     if (reducedMotion) {
@@ -67,7 +70,13 @@ export function ScrollShowcase({
       // Held back at the end: the pinned viewport itself, the rest beat, and
       // the viewport the panel needs to rise over the top. What is left is the
       // distance the pull-back actually runs over.
-      const travel = box.height - window.innerHeight * (hold + 2);
+      //
+      // Both terms are measured rather than taken from `window.innerHeight`.
+      // The runway is laid out in `svh`, which a phone holds still, while
+      // `innerHeight` follows the URL bar — mixing the two stretched the
+      // runway by the height of the bar, so the mosaic finished opening a
+      // beat late and the mapping jumped every time the bar moved.
+      const travel = box.height - pin.offsetHeight - (box.height / units) * (hold + 1);
       const progress = travel <= 0 ? 1 : Math.min(Math.max(-box.top / travel, 0), 1);
       section.style.setProperty("--p", progress.toFixed(4));
     };
@@ -86,16 +95,16 @@ export function ScrollShowcase({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [reducedMotion, hold]);
+  }, [reducedMotion, hold, units]);
 
   const style = {
-    "--runway": `${(runway + hold + 2) * 100}vh`,
+    "--runway-units": units,
     "--words": words.length,
   } as CSSProperties;
 
   return (
     <section ref={sectionRef} className={styles.section} style={style}>
-      <div className={styles.pin}>
+      <div ref={pinRef} className={styles.pin}>
         <div className={styles.mosaic}>
           {showcase.tiles.map((tile) => (
             <div key={tile.cell} className={styles.tile} data-cell={tile.cell}>

@@ -220,10 +220,13 @@
 
 /* ----------------------------------------------------------- brandmark */
 
+/* The page runs under the notch and the home indicator (viewport-fit: cover),
+   so anything pinned to an edge pays the safe area back. env() is 0px where
+   there is no inset, which leaves the desktop layout untouched. */
 .brandmark {
   position: absolute;
-  top: var(--gutter);
-  left: var(--gutter);
+  top: calc(var(--gutter) + env(safe-area-inset-top, 0px));
+  left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
   line-height: 0;
 }
 
@@ -246,20 +249,20 @@
 }
 
 .edgeLeft {
-  left: var(--gutter);
+  left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
 }
 
 .edgeRight {
-  right: var(--gutter);
+  right: calc(var(--gutter) + env(safe-area-inset-right, 0px));
 }
 
 /* ---------------------------------------------------------- bottom nav */
 
 .bottomNav {
   position: absolute;
-  right: var(--gutter);
-  bottom: var(--gutter);
-  left: var(--gutter);
+  right: calc(var(--gutter) + env(safe-area-inset-right, 0px));
+  bottom: calc(var(--gutter) + env(safe-area-inset-bottom, 0px));
+  left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
 }
 
 .navList {

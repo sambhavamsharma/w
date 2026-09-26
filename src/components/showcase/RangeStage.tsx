@@ -42,19 +42,25 @@ export function RangeStage({
   runway = 3.4,
 }: RangeStageProps) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const count = panel.carousel?.length ?? 0;
 
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage || count < 2) return;
+    const pin = pinRef.current;
+    if (!stage || !pin || count < 2) return;
 
     let frame = 0;
 
     const update = () => {
       frame = 0;
       const box = stage.getBoundingClientRect();
-      const travel = box.height - window.innerHeight;
+      // How far the pin actually travels before it lets go, measured rather
+      // than assumed: on a phone `window.innerHeight` rides the URL bar and
+      // does not match the pin, which left the last card and the sweep still
+      // mid-flight when the stage scrolled away.
+      const travel = box.height - pin.offsetHeight;
       const scrolled = travel <= 0 ? 0 : Math.min(Math.max(-box.top / travel, 0), 1);
       const through = Math.min(scrolled / CAROUSEL_END, 1);
       setActive(Math.round(through * (count - 1)));
@@ -79,10 +85,11 @@ export function RangeStage({
   return (
     <div
       ref={stageRef}
+      id="range"
       className={styles.stage}
-      style={{ "--stage-runway": `${runway * 100}vh` } as CSSProperties}
+      style={{ "--stage-runway-units": runway } as CSSProperties}
     >
-      <div className={styles.stagePin}>
+      <div ref={pinRef} className={styles.stagePin}>
         {brandmark ? (
           <div className={styles.stageBrandmark}>
             <Image
@@ -116,6 +123,7 @@ export function RangeStage({
         <PageCurtain
           color={curtainColor}
           trackRef={stageRef}
+          pinRef={pinRef}
           delay={CURTAIN_START}
         />
       </div>

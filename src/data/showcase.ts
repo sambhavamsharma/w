@@ -1,9 +1,18 @@
 import type { StaticImageData } from "next/image";
 
-import citrus from "@/assets/slides/01-editorial-glow.jpg";
-import teaTree from "@/assets/slides/02-rose-dream.jpg";
-import lavender from "@/assets/slides/03-violet-mystique.jpg";
-import goldenHour from "@/assets/slides/04-golden-hour.jpg";
+import citrus from "@/assets/slides/01-editorial-glow.png";
+import teaTree from "@/assets/slides/02-rose-dream.png";
+import lavender from "@/assets/slides/03-violet-mystique.png";
+import goldenHour from "@/assets/slides/04-golden-hour.png";
+
+// The mosaic's own photos, one per grid cell — dropped in as they arrive.
+// Cells without one yet still fall back to the range photos above.
+import mosaicTopLeft from "@/assets/mosaic/mosaic-top-left.png";
+import mosaicTop from "@/assets/mosaic/mosaic-top.png";
+import mosaicTopRight from "@/assets/mosaic/mosaic-top-right.png";
+import mosaicLeft from "@/assets/mosaic/mosaic-left.png";
+import mosaicCenter from "@/assets/mosaic/mosaic-center.png";
+import mosaicRight from "@/assets/mosaic/mosaic-right.png";
 
 /** The nine boxes of the mosaic, by position in the grid. */
 export type MosaicCell =
@@ -44,19 +53,20 @@ export interface Showcase {
 export const showcase: Showcase = {
   eyebrow: "Washela",
   body:
-    "A hand wash range in three scents. Citrus, tea tree and lavender, " +
-    "each made for the quiet part of the day.",
+    "Hand wash, dish wash and floor cleaner. Everyday essentials, " +
+    "made gentle and scented for the quiet part of the day.",
 
-  centre: lavender,
+  centre: mosaicCenter,
 
-  // One line per box. Point each at its own file — several repeat for now
-  // because there are only four photographs in the project.
+  // One line per box, each pointed at its own file. Cells still waiting on
+  // their photo fall back to a range shot for now — swap the fallback for
+  // the real file (see the mosaic/ import above) as each one arrives.
   tiles: [
-    { cell: "top-left", image: citrus },
-    { cell: "top", image: teaTree },
-    { cell: "top-right", image: goldenHour },
-    { cell: "left", image: citrus },
-    { cell: "right", image: teaTree },
+    { cell: "top-left", image: mosaicTopLeft },
+    { cell: "top", image: mosaicTop },
+    { cell: "top-right", image: mosaicTopRight },
+    { cell: "left", image: mosaicLeft },
+    { cell: "right", image: mosaicRight },
     { cell: "bottom-left", image: lavender },
     { cell: "bottom", image: goldenHour },
     { cell: "bottom-right", image: citrus },

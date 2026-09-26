@@ -13,7 +13,12 @@
   --gutter: clamp(1.125rem, 3.4vw, 3.25rem);
 
   position: relative;
-  height: var(--runway);
+  /* Laid out in `svh`, not `vh`: a phone keeps `svh` still while the URL bar
+     comes and goes, so the runway — and with it every scroll position the
+     animation is keyed to — stays put instead of resizing under the reader.
+     The pin below still takes `dvh`, so it always fills the screen. */
+  height: calc(var(--runway-units, 4) * 100vh);
+  height: calc(var(--runway-units, 4) * 100svh);
   background: #050505;
 }
 

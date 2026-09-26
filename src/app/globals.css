@@ -16,10 +16,19 @@ body {
   color: #fff;
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* `hidden` makes the body a scroll container, which is enough to break the
+     sticky pins the whole page is built on in some mobile browsers. `clip`
+     trims the same overflow without ever becoming one. */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 ::selection {
   background: #fff;
   color: #050505;
+}
+
+/* Scroll lock while the hand-wash hero's nav sheet is open. */
+body.nav-open {
+  overflow: hidden;
 }

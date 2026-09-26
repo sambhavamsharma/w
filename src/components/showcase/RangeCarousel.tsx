@@ -44,7 +44,7 @@ export function RangeCarousel({
       activeIndex={activeIndex}
       onActiveIndexChange={onActiveIndexChange}
       loop
-      slideWidth={isPhone ? 186 : 230}
+      slideWidth={isPhone ? 220 : 300}
       rotationStep={isPhone ? 48 : 60}
       inactiveScale={isPhone ? 0.82 : 0.85}
       showControls={false}

@@ -1,10 +1,10 @@
 import type { StaticImageData } from "next/image";
 
 import logo from "@/assets/slides/logo.png";
-import citrus from "@/assets/slides/01-editorial-glow.jpg";
-import teaTree from "@/assets/slides/02-rose-dream.jpg";
-import lavender from "@/assets/slides/03-violet-mystique.jpg";
-import goldenHour from "@/assets/slides/04-golden-hour.jpg";
+import citrus from "@/assets/slides/01-editorial-glow.png";
+import teaTree from "@/assets/slides/02-rose-dream.png";
+import lavender from "@/assets/slides/03-violet-mystique.png";
+import goldenHour from "@/assets/slides/04-golden-hour.png";
 
 export interface Slide {
   /** Stable key. */

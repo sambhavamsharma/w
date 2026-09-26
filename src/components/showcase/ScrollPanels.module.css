@@ -9,8 +9,11 @@
   position: relative;
   z-index: 1;
   /* Travel is set by the component: the taller it is, the more scrolling each
-     card and the sweep take. */
-  height: var(--stage-runway, 340vh);
+     card and the sweep take. Laid out in `svh` so a phone holds it still while
+     the URL bar comes and goes; the pin below still takes `dvh` and fills the
+     screen. */
+  height: calc(var(--stage-runway-units, 3.4) * 100vh);
+  height: calc(var(--stage-runway-units, 3.4) * 100svh);
   /* Rises over the mosaic while that is still pinned, same as the panels do. */
   margin-top: -100vh;
   margin-top: -100dvh;
@@ -26,8 +29,8 @@
 
 .stageBrandmark {
   position: absolute;
-  top: var(--gutter);
-  left: var(--gutter);
+  top: calc(var(--gutter) + env(safe-area-inset-top, 0px));
+  left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
   z-index: 2;
   line-height: 0;
   pointer-events: none;
@@ -62,10 +65,10 @@
    in the corner once the opening frame is behind you. */
 .brandmark {
   position: sticky;
-  top: var(--gutter);
+  top: calc(var(--gutter) + env(safe-area-inset-top, 0px));
   z-index: 2;
   height: 0;
-  padding-left: var(--gutter);
+  padding-left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
   line-height: 0;
   pointer-events: none;
 }
@@ -99,11 +102,14 @@
 .carousel {
   position: relative;
   width: 100%;
+  /* Sized against the same unit as the panel it sits in, so the cards cannot
+     spill past the fold while a phone's URL bar is showing. */
   height: min(62vh, 33rem);
+  height: min(62dvh, 33rem);
 }
 
 .panel[data-tone="olive"] {
-  background: #4e5842;
+  background: #0a0d0a;
 }
 
 .panel[data-tone="deep"] {

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { Slide } from "@/data/slides";
 import styles from "./HeroSlider.module.css";
 
@@ -6,12 +8,17 @@ interface BottomNavProps {
   current: number;
   /** Drives the hairline sweep that doubles as the autoplay countdown. */
   timing: boolean;
-  onSelect: (index: number) => void;
 }
 
-export function BottomNav({ slides, current, timing, onSelect }: BottomNavProps) {
+/**
+ * Doubles as the product entry point: each label still tracks the slide
+ * showing behind it (autoplay, swipe, arrow keys all still drive that), but
+ * a click no longer switches slides in place — it takes the reader to the
+ * hand wash page, where the same three scents wait as an actual choice.
+ */
+export function BottomNav({ slides, current, timing }: BottomNavProps) {
   return (
-    <nav className={styles.bottomNav} aria-label="Slides" data-slider-nodrag>
+    <nav className={styles.bottomNav} aria-label="Shop hand wash" data-slider-nodrag>
       <ul className={styles.navList}>
         {slides.map((slide, index) => {
           const isActive = index === current;
@@ -22,13 +29,12 @@ export function BottomNav({ slides, current, timing, onSelect }: BottomNavProps)
               className={styles.navItem}
               data-active={isActive ? "true" : "false"}
             >
-              <button
-                type="button"
+              <Link
+                href="/handwash"
                 className={`${styles.navButton} ${styles.label}`}
                 data-active={isActive ? "true" : "false"}
                 data-timing={isActive && timing ? "true" : "false"}
                 aria-current={isActive ? "true" : undefined}
-                onClick={() => onSelect(index)}
               >
                 <span className={styles.navRule} aria-hidden="true">
                   <span
@@ -42,7 +48,7 @@ export function BottomNav({ slides, current, timing, onSelect }: BottomNavProps)
                   <span className={styles.navIndex}>{slide.index}</span>
                   <span className={styles.navTitle}>{slide.title}</span>
                 </span>
-              </button>
+              </Link>
             </li>
           );
         })}

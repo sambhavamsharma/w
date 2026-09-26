@@ -9,6 +9,8 @@ export interface PageCurtainProps {
   color: string;
   /** Element whose scroll travel drives the sweep. */
   trackRef: React.RefObject<HTMLElement | null>;
+  /** The pinned child of the track — what the track's travel is measured against. */
+  pinRef: React.RefObject<HTMLElement | null>;
   /** Fraction of that travel spent on the page before the sweep starts. */
   delay?: number;
 }
@@ -60,20 +62,29 @@ function curtainPath(progress: number) {
  * carrying you into the next one. Nothing new appears in between: the shape is
  * the colour of the page you are arriving at, so it simply becomes that page.
  */
-export function PageCurtain({ color, trackRef, delay = 0.3 }: PageCurtainProps) {
+export function PageCurtain({
+  color,
+  trackRef,
+  pinRef,
+  delay = 0.3,
+}: PageCurtainProps) {
   const pathRef = useRef<SVGPathElement>(null);
 
   useEffect(() => {
     const path = pathRef.current;
     const track = trackRef.current;
-    if (!path || !track) return;
+    const pin = pinRef.current;
+    if (!path || !track || !pin) return;
 
     let frame = 0;
 
     const update = () => {
       frame = 0;
       const box = track.getBoundingClientRect();
-      const travel = box.height - window.innerHeight;
+      // Measured off the pin rather than `window.innerHeight`, so the sweep
+      // finishes exactly as the page lets go — on a phone the two disagree by
+      // the height of the URL bar and the sweep was cut off part-drawn.
+      const travel = box.height - pin.offsetHeight;
       const scrolled = travel <= 0 ? 1 : Math.min(Math.max(-box.top / travel, 0), 1);
       // The page holds for a beat before the sweep begins.
       const progress = delay >= 1 ? 0 : (scrolled - delay) / (1 - delay);
@@ -94,7 +105,7 @@ export function PageCurtain({ color, trackRef, delay = 0.3 }: PageCurtainProps) 
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [trackRef, delay]);
+  }, [trackRef, pinRef, delay]);
 
   return (
     <svg

@@ -19,6 +19,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#050505",
+  // The hero and every pinned panel are full-bleed, so the page has to be
+  // allowed under the notch and the home indicator. The gutters pay the safe
+  // areas back with env() insets.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -1,0 +1,55 @@
+/* The hero scrolls away with its layers moving at different speeds (see the
+   component), and the statement panel follows straight on — nothing sits
+   between the two. */
+
+.parallax {
+  --content-bg: #0a0d0a;
+
+  position: relative;
+  background: var(--content-bg);
+}
+
+.header {
+  position: relative;
+}
+
+/* Reserves a further viewport at the end: the Range page rises over the
+   bottom of whatever precedes it, and this is the part it covers. */
+.content {
+  position: relative;
+  z-index: 1;
+  background: var(--content-bg);
+  color: #fff;
+  padding-bottom: 100vh;
+  padding-bottom: 100dvh;
+}
+
+.contentInner {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  padding: clamp(1.5rem, 6vw, 5rem) clamp(1.125rem, 5vw, 4rem);
+  text-align: center;
+}
+
+.eyebrow {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.statement {
+  margin: 0;
+  max-width: 24ch;
+  font-size: clamp(1.6rem, 4vw, 3.6rem);
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
