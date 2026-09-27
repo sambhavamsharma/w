@@ -15,9 +15,12 @@
 
 /* The seam between the hero and the panel, softened into drifting cloud: the
    panel's own colour rises out of the bottom in overlapping plumes, warming
-   through the hero's purple on the way. Held at zero until the scroll brings
-   it up, so the hero at rest is untouched. Its foot is the panel's exact
-   colour, which is what makes the join disappear. */
+   through the hero's own scent colour on the way — `--bloom-1`/`--bloom-2`
+   are set on the root by Hero once it picks a scent, so the cloud (a sibling,
+   not a descendant, of the hero markup) always tints to match whichever
+   bottle is actually showing, not a hardcoded lavender. Held at zero until
+   the scroll brings it up, so the hero at rest is untouched. Its foot is the
+   panel's exact colour, which is what makes the join disappear. */
 .cloud {
   position: absolute;
   left: 0;
@@ -31,17 +34,38 @@
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px);
   mask-image: linear-gradient(to bottom, transparent 0, #000 24px);
   background:
-    radial-gradient(58% 78% at 14% 108%, rgba(10, 13, 10, 1) 0%, rgba(10, 13, 10, 0) 72%),
-    radial-gradient(52% 72% at 48% 112%, rgba(10, 13, 10, 1) 0%, rgba(10, 13, 10, 0) 74%),
-    radial-gradient(46% 68% at 86% 106%, rgba(10, 13, 10, 1) 0%, rgba(10, 13, 10, 0) 72%),
-    radial-gradient(70% 60% at 32% 78%, rgba(96, 78, 150, 0.5) 0%, rgba(96, 78, 150, 0) 70%),
-    radial-gradient(60% 55% at 74% 70%, rgba(168, 148, 221, 0.4) 0%, rgba(168, 148, 221, 0) 70%),
+    radial-gradient(
+      58% 78% at 14% 108%,
+      rgba(10, 13, 10, 1) 0%,
+      rgba(10, 13, 10, 0) 72%
+    ),
+    radial-gradient(
+      52% 72% at 48% 112%,
+      rgba(10, 13, 10, 1) 0%,
+      rgba(10, 13, 10, 0) 74%
+    ),
+    radial-gradient(
+      46% 68% at 86% 106%,
+      rgba(10, 13, 10, 1) 0%,
+      rgba(10, 13, 10, 0) 72%
+    ),
+    radial-gradient(
+      70% 60% at 32% 78%,
+      color-mix(in srgb, var(--bloom-1, #8e77cf) 50%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      60% 55% at 74% 70%,
+      color-mix(in srgb, var(--bloom-2, #a894dd) 40%, transparent) 0%,
+      transparent 70%
+    ),
     linear-gradient(
       to top,
       var(--content-bg) 0%,
-      rgba(22, 17, 34, 0.92) 26%,
-      rgba(88, 68, 140, 0.52) 58%,
-      rgba(160, 138, 214, 0) 100%
+      color-mix(in srgb, var(--bloom-1, #8e77cf) 12%, rgba(22, 17, 34, 0.92))
+        26%,
+      color-mix(in srgb, var(--bloom-2, #a894dd) 52%, transparent) 58%,
+      transparent 100%
     );
 }
 

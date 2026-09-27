@@ -7,7 +7,9 @@ import { Store } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
-import bottle from "@/assets/hero/bottle.png";
+import bottleLavender from "@/assets/hero/bottle.png";
+import bottleOrange from "@/assets/hero/bottle-orange.png";
+import bottleTeaTree from "@/assets/hero/bottle-tea-tree.png";
 import { brandmark } from "@/data/slides";
 import { ArrowIcon } from "./icons";
 import styles from "./Hero.module.css";
@@ -46,6 +48,67 @@ const RELEASE_BOTTLE = `(function(){var s=document.currentScript,r=s&&s.closest(
 /** Stagger index for the entrance choreography. */
 const d = (n: number) => ({ "--d": n }) as CSSProperties;
 
+interface HeroVariant {
+  key: string;
+  scent: string;
+  image: typeof bottleLavender;
+  alt: string;
+  /** The bloom's five gradient stops and the bottle's shadow tint. */
+  vars: CSSProperties;
+}
+
+/**
+ * The three scents that can open the site. Picked at random, with equal
+ * odds, once on the client after mount — the server (and the very first
+ * client render, before the pick lands) always shows lavender, so there is
+ * nothing for hydration to disagree about; the swap to whichever scent won
+ * follows a moment later, well before the held bottle is released.
+ */
+const VARIANTS: HeroVariant[] = [
+  {
+    key: "lavender",
+    scent: "Lavender",
+    image: bottleLavender,
+    alt: "Washela lavender hand wash bottle.",
+    vars: {
+      "--bloom-1": "#8e77cf",
+      "--bloom-2": "#a894dd",
+      "--bloom-3": "rgba(198, 186, 234, 0.9)",
+      "--bloom-4": "#ebe5f7",
+      "--bloom-5": "#c3b4ea",
+      "--bottle-shadow": "rgba(52, 34, 104, 0.38)",
+    } as CSSProperties,
+  },
+  {
+    key: "tea-tree",
+    scent: "Tea Tree",
+    image: bottleTeaTree,
+    alt: "Washela tea tree hand wash bottle.",
+    vars: {
+      "--bloom-1": "#4c8b3f",
+      "--bloom-2": "#74af5e",
+      "--bloom-3": "rgba(190, 224, 176, 0.9)",
+      "--bloom-4": "#e7f2dd",
+      "--bloom-5": "#b8daa0",
+      "--bottle-shadow": "rgba(31, 64, 24, 0.35)",
+    } as CSSProperties,
+  },
+  {
+    key: "orange",
+    scent: "Orange",
+    image: bottleOrange,
+    alt: "Washela orange hand wash bottle.",
+    vars: {
+      "--bloom-1": "#e08a2b",
+      "--bloom-2": "#eba957",
+      "--bloom-3": "rgba(247, 214, 160, 0.9)",
+      "--bloom-4": "#fbe9d2",
+      "--bloom-5": "#f2c184",
+      "--bottle-shadow": "rgba(120, 66, 10, 0.35)",
+    } as CSSProperties,
+  },
+];
+
 /**
  * The hero: copy set over a dark gradient that blooms into
  * the scent's colour while the bottle rises into frame, tilted, from below.
@@ -61,6 +124,33 @@ export function Hero() {
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [onPanel, setOnPanel] = useState(false);
+
+  // Starts on lavender (index 0) so the first paint — server and client
+  // alike — is identical and hydration has nothing to reconcile; the random
+  // pick lands a moment later, well before the held bottle is released.
+  const [variantIndex, setVariantIndex] = useState(0);
+  useEffect(() => {
+    // Genuinely can't be derived during render — it's a one-time coin flip,
+    // not state synchronized from anything the render could read.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVariantIndex(Math.floor(Math.random() * VARIANTS.length));
+  }, []);
+  const variant = VARIANTS[variantIndex];
+
+  // The seam-blend cloud between the hero and the panel below (see
+  // ParallaxComponent) is a sibling, not a descendant — a scent's colours
+  // set inline here never reach it. Custom properties on the root cascade to
+  // everything on the page, cloud included, without the two components
+  // needing to know about each other.
+  useEffect(() => {
+    const root = document.documentElement.style;
+    const entries = Object.entries(variant.vars as Record<string, string>);
+    for (const [prop, value] of entries) root.setProperty(prop, value);
+    return () => {
+      for (const [prop] of entries) root.removeProperty(prop);
+    };
+  }, [variant]);
+
   const syncBurgerContrast = useCallback(() => {
     const btn = toggleRef.current;
     const panel = panelRef.current;
@@ -135,13 +225,13 @@ export function Hero() {
       <section className={styles.hero}>
         {/* Painted first so everything after it sits above — no z-index, so
             the burger can still rise above the nav sheet. */}
-        <div className={styles.bloom} aria-hidden="true" />
+        <div className={styles.bloom} style={variant.vars} aria-hidden="true" />
 
         <div className={styles.bottleWrap} data-parallax-layer="1">
           <Image
             className={styles.bottle}
-            src={bottle}
-            alt="Washela lavender hand wash bottle."
+            src={variant.image}
+            alt={variant.alt}
             fill
             sizes="(max-width: 768px) 60vw, 30vw"
             quality={85}

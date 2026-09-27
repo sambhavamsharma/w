@@ -98,10 +98,22 @@ export const panels: Panel[] = [
     title: "Range",
     tone: "olive",
     carousel: [
-      { image: citrus, title: "Citrus", alt: "Washela citrus hand wash." },
-      { image: teaTree, title: "Tea Tree", alt: "Washela tea tree hand wash." },
-      { image: lavender, title: "Lavender", alt: "Washela lavender hand wash." },
-      { image: goldenHour, title: "Golden Hour", alt: "Backlit profile at sunset." },
+      { image: citrus, title: "Hand Wash", alt: "Washela citrus hand wash." },
+      {
+        image: teaTree,
+        title: "Dish Wash",
+        alt: "Washela tea tree hand wash.",
+      },
+      {
+        image: lavender,
+        title: "Floor Cleaner",
+        alt: "Washela lavender hand wash.",
+      },
+      {
+        image: goldenHour,
+        title: "Golden Hour",
+        alt: "Backlit profile at sunset.",
+      },
     ],
   },
   { id: "connect", title: "Connect", tone: "deep" },

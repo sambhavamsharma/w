@@ -30,7 +30,8 @@
 @keyframes bottleIn {
   from {
     opacity: 0;
-    transform: translate3d(6vw, 72vh, 0) rotate(calc(var(--tilt) + 26deg)) scale(0.88);
+    transform: translate3d(6vw, 72vh, 0) rotate(calc(var(--tilt) + 26deg))
+      scale(0.88);
   }
   60% {
     opacity: 1;
@@ -93,19 +94,32 @@
 }
 
 /* White at the top left, the scent colour pooling behind the bottle. */
+/* Recoloured per scent by the component (see `--bloom-*` below); these are
+   the lavender values, kept as the fallback so the hero still looks right
+   with no script and before the variant is picked. */
 .bloom {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(
       110% 95% at 72% 88%,
-      #8e77cf 0%,
-      #a894dd 26%,
-      rgba(198, 186, 234, 0.9) 54%,
+      var(--bloom-1, #8e77cf) 0%,
+      var(--bloom-2, #a894dd) 26%,
+      var(--bloom-3, rgba(198, 186, 234, 0.9)) 54%,
       rgba(244, 241, 250, 0) 84%
     ),
-    linear-gradient(135deg, #faf8fd 0%, #ebe5f7 44%, #c3b4ea 100%);
+    linear-gradient(
+      135deg,
+      #faf8fd 0%,
+      var(--bloom-4, #ebe5f7) 44%,
+      var(--bloom-5, #c3b4ea) 100%
+    );
   animation: bloom 2.4s var(--ease-out) 0.15s both;
+  /* No transition here on purpose: a scent's gradient is several stops
+     across two layered backgrounds, and animating between two different
+     colour sets cross-fades through muddy in-between colours (a purple
+     patch turning orange visibly passes through brown) rather than a clean
+     cut. The swap happens moments after mount, before there's much to see. */
 }
 
 .bottleWrap {
@@ -119,7 +133,9 @@
 
 .bottle {
   object-fit: contain;
-  filter: drop-shadow(0 44px 56px rgba(52, 34, 104, 0.38));
+  filter: drop-shadow(
+    0 44px 56px var(--bottle-shadow, rgba(52, 34, 104, 0.38))
+  );
   transform-origin: 50% 82%;
   animation:
     bottleIn 1.9s var(--ease-out) 0.25s both,
@@ -313,7 +329,8 @@
   width: min(100%, 460px);
   display: flex;
   flex-direction: column;
-  padding: calc(var(--pad) + 78px) clamp(24px, 6vw, 52px) calc(var(--pad) + 12px);
+  padding: calc(var(--pad) + 78px) clamp(24px, 6vw, 52px)
+    calc(var(--pad) + 12px);
   padding-bottom: max(calc(var(--pad) + 12px), env(safe-area-inset-bottom));
   background: rgba(20, 20, 23, 0.94);
   backdrop-filter: blur(26px) saturate(150%);
@@ -374,9 +391,7 @@
     transform 0.6s var(--ease-out),
     color 0.25s ease;
   transition-delay:
-    calc(0.16s + var(--i) * 0.062s),
-    calc(0.16s + var(--i) * 0.062s),
-    0s;
+    calc(0.16s + var(--i) * 0.062s), calc(0.16s + var(--i) * 0.062s), 0s;
 }
 
 .navsheetLink svg {
