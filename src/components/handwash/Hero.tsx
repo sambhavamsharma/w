@@ -21,9 +21,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 const NAV_LINKS = [
-  { label: "Range", href: "/#range" },
-  { label: "Ingredients", href: "#" },
-  { label: "Story", href: "/" },
+  { label: "Range", href: "/range" },
   { label: "Contact", href: "/#contact" },
 ];
 
