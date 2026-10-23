@@ -48,7 +48,7 @@ export function RangeCarousel({
       rotationStep={isPhone ? 48 : 60}
       inactiveScale={isPhone ? 0.82 : 0.85}
       showControls={false}
-      labelClassName="text-white/85 uppercase tracking-[0.22em] text-[0.625rem]"
+      labelClassName="text-white/85 uppercase tracking-[0.22em]"
     />
   );
 }

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { Store } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
@@ -13,12 +12,6 @@ import bottleTeaTree from "@/assets/hero/bottle-tea-tree.png";
 import { brandmark } from "@/data/slides";
 import { ArrowIcon } from "./icons";
 import styles from "./Hero.module.css";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-});
 
 const NAV_LINKS = [
   { label: "Range", href: "/range" },
@@ -208,12 +201,10 @@ export function Hero() {
 
   return (
     // The inline release script sets `data-bottle-ready` before hydration, on
-    // purpose — React shouldn't flag that attribute as a mismatch.
-    <div
-      className={`${styles.scope} ${plusJakarta.className}`}
-      data-hero
-      suppressHydrationWarning
-    >
+    // purpose — React shouldn't flag that attribute as a mismatch. Type comes
+    // from the global Geist on the body; its variable file covers every weight
+    // the hero uses (400–700), so there is no font to load here.
+    <div className={styles.scope} data-hero suppressHydrationWarning>
       {/* Without scripts nothing would ever release the held bottle. */}
       <noscript>
         <style>
